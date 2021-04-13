@@ -1,7 +1,7 @@
 ---
 title: "Practice Exam"
 author: "Logan Bennett"
-date: "4/8/2021"
+date: "4/12/2021"
 output: html_document
 editor_options: 
   chunk_output_type: console
