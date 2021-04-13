@@ -26,6 +26,8 @@ car_mlogit <- Car %>%
 head(car_mlogit)
 ```
 
+## Model Iteration and Statistical Analysis
+
 Now that I have the data set loaded I can create some base models to compare, from which I can iterate different models and seek the one that best fits the data. I am beginning my base analysis on the assumption that people prioritize their choice of vehicle primarily on the type of vehicle they want and their preferred price range. From there I will introduce other important variables that I think will likely influence their choice, such as the fuel type of the vehicle and the range of the vehicle (fuel economy).
 
 ```{r base models}
@@ -115,23 +117,72 @@ tibble(
   kable_styling()
 ```
 
-The results of the log likelihood ratio tests can be interpreted in the same way as the similar tests above. The test statistics for the respective tests with 2, 1, and 1 degrees of freedom indicate that the variables should not be excluded from the final model, though pollution is somewhat less critical to include than speed, acceleration, and cost. I will use model M7 that includes all these variables as a base for a final segmentation analysis, shown below.
+The results of the log likelihood ratio tests can be interpreted in the same way as the similar tests above. The test statistics for the respective tests with 2, 1, and 1 degrees of freedom indicate that the variables should not be excluded from the final model, though pollution is somewhat less critical to include than speed, acceleration, and cost. I will use model M7 that includes all these variables as a base for a final segmentation analysis, shown below.(I could do a third iteration of models before doing the segmentation analysis where I analyze the effects of the alternative specific variables, but I've worked on this for five hours at this point and am choosing to move on).
 
-```{r segmentation, eval = FALSE}
+## Segmentation Analysis 
+
+```{r range segmentation, eval = FALSE}
 #segmentation example
 
-base_model <- mlogit(chosen ~ tvtt + cost | wkempden, data = sf_work)
-withincome <- mlogit(chosen ~ tvtt + cost | hhinc + wkempden, data = sf_work)
-highincome <- mlogit(chosen ~ tvtt + cost | hhinc + wkempden, 
-                     data = sf_work %>% filter(hhinc > 50))
-low_income <- mlogit(chosen ~ tvtt + cost | hhinc + wkempden, 
-                     data = sf_work %>% filter(hhinc <= 50))
+M7 <- mlogit(choice ~ type + fuel + price + range + acc + speed + pollution + cost - 1, data = car_mlogit)
+lowrange <- mlogit(choice ~ type + fuel + price + acc + speed + pollution + cost - 1, data = car_mlogit %>% filter(range < 200))
+highrange <- mlogit(choice ~ type + fuel + price + acc + speed + pollution + cost - 1, data = car_mlogit %>% filter(range >= 200))
+
 
 list(
-  "Base" = base_model,
-  "Income" = withincome,
-  "High Income" = highincome,
-  "Low Income"  = low_income
+  "With Acceleration, Speed, Pollution, and Cost" = M7,
+  "Low Range" = lowrange,
+  "High Range" = highrange,
 ) %>%
   modelsummary(fmt = "%.5f", stars = TRUE, statistic_vertical = TRUE)
 ```
+
+The segmentation analysis above is intended to highlight the differences to the model if we consider only those vehicles with low range (those that must refuel or recharge before 200 miles) or only those with high range (those that can travel 200 or more miles before refueling or recharging). The code is not currently working for me, but I would compare statistical values and model coefficients of these models as done previously to determine which model would be most useful.
+
+## Comparative Analysis
+
+The next step after choosing a final model is to use the model coefficients to analyze comparative relationships between model parameters. I am interested in determining how much range a vehicle must have for a person to consider switching to a separate fuel type from gasoline. I will do this by comparing the coefficients for range and fuel type on my final model.
+
+```{r range and fuel type comparison}
+#Create a function to calculate the comparative value
+comparefunction <- function(model, fuelvar, rangevar) {
+  coef(model)[fuelvar]/coef(model)[rangevar]
+}
+
+tibble(
+"Fuel Type" = c("Methanol", "Compressed Natural Gas", "Electric"),
+"Range per fuel type (miles/type)" = c(round(c(comparefunction(M7, "fuelmethanol", "range")), 2), round(c(comparefunction(M7, "fuelcng", "range")), 2),round(c(comparefunction(M7, "fuelelectric", "range")), 2))
+) %>%
+   kbl(align = 'c', caption = "Range Needed for Separate Fuel Types") %>%
+   kable_styling()
+
+```
+
+That didn't really tell me what I wanted it to, so now I will analyze the data to determine the travel costs that a person is willing to spend to have a faster car. I will do this by comparing the coefficients for cost and speed on my final model.
+
+```{r travel cost and speed comparison}
+#Create a function to calculate the comparative value
+costfunction <- function(model, speedvar, costvar) {
+  coef(model)[speedvar]/(coef(model)[costvar]*10)
+}
+
+tibble(
+"Travel Cost per Max Speed" = "",
+"Cost ($) per mile / mph" = round(c(costfunction(M7, "speed", "cost")), 2)
+)%>%
+   kbl(align = 'c', caption = "Travel Cost Tradeoff for Speed") %>%
+   kable_styling()
+
+```
+
+I understand the purpose of these comparisons and I feel like I'm pretty clear on the concept of utils of the coefficients (at least I understand value of time very well), but I am having a hard time working with the variables in this data set to produce meaningful results. I hope that I can get some good feedback regarding segmentation and these comparative analyses prior to the final exam, since I have hit a few roadblocks.
+
+My final model I chose was model M7, which included the following variables:
+
+```{r final model}
+M7 <- mlogit(choice ~ type + fuel + price + range + acc + speed + pollution + cost | -1, data = car_mlogit)
+
+list("With Acceleration, Speed, Pollution, and Cost" = M7) %>% 
+  modelsummary(fmt = "%.5f", stars = TRUE, statistic_vertical = TRUE)
+```
+
