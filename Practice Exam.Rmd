@@ -1,0 +1,105 @@
+---
+title: "Practice Exam"
+author: "Logan Bennett"
+date: "4/8/2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+library(mlogit)
+library(tidyverse)
+library(modelsummary)
+library(haven)
+library(knitr)
+library(kableExtra)
+```
+
+First I need to load in the cars data set and format it in a way that I can perform logit modeling.
+
+```{r cars data}
+data(Car, package = "mlogit")
+car_mlogit <- Car %>%
+  mutate(choice = gsub("choice", "", choice)) %>%
+  dfidx( varying = 5:70, shape = "wide", choice = "choice", sep = "")
+```
+
+Now that I have the data set loaded I can create some base models to compare, from which I can iterate different models and seek the one that best fits the data. I am beginning my base analysis on the assumption that people prioritize their choice of vehicle primarily on the type of vehicle they want and their preferred price range. From there I will introduce other important variables that I think will likely influence their choice, such as the fuel type of the vehicle and the range of the vehicle (fuel economy).
+
+```{r base models}
+#This model accounts for type and price
+base_model <- mlogit(choice ~ type -1 + price, data = car_mlogit)
+#This model accounts for type, fuel, and price
+M1 <- mlogit(choice ~ type -1 + fuel + price, data = car_mlogit)
+#This model accounts for type, price, and range
+M2 <- mlogit(choice ~ type -1 + price + range, data = car_mlogit)
+#This model accounts for type, fuel, price, and range
+M3 <- mlogit(choice ~ type -1 + fuel + price + range, data = car_mlogit)
+
+list(
+  "Base Model" = base_model,
+  "Fuel Type" = M1,
+  "Fuel Economy" = M2,
+  "Fuel Type and Economy"  = M3
+) %>%
+  modelsummary(fmt = "%.5f", stars = TRUE, statistic_vertical = TRUE)
+```
+
+The model summary above shows four separate models, the base model being that which includes only type of vehicle and price. The other three models include fuel type, range (fuel economy), and both fuel type and fuel economy, respectively. Because the options for vehicle type were different for each person in the data set, the intercepts would not have provided any meaningful information and they were excluded from the models.
+
+```{r log likelihood test base models}
+#update = base model will be restricted for a few cases (won't actually use base)
+#Create likelihood ratio test table
+tibble(
+  Hypothesis = c("$H_{0a}$","$H_{0b}$"),
+  LL_U = rep(base_model$logLik, 2),
+  LL_R = c(null_modela$logLik, null_modelb$logLik)
+) %>%
+  mutate(
+    test_stat = -2 * (LL_R - LL_U),
+    df = c(12, 7),
+    "Crtical Chi-Squared at 99.9% Conf." = qchisq(0.999, df),
+    "P-value" = pchisq(test_stat, df, lower.tail = FALSE)
+  ) %>%
+  kbl(align = 'c', caption = "Likelihood Ratio Test for Hypothesis $H_{0,a}$ and $H_{0,b}$") %>%
+  kable_styling()
+```
+
+```{r data visualization}
+#Create a data set of the numeric columns of data for comparison
+car_mlogit_numeric <- car_mlogit[-c(1:6)]
+car_mlogit_numeric$price <- as.numeric(car_mlogit_numeric$price)
+car_mlogit_numeric$range <- as.numeric(car_mlogit_numeric$range)
+car_mlogit_numeric$acc <- as.numeric(car_mlogit_numeric$acc)
+car_mlogit_numeric$speed <- as.numeric(car_mlogit_numeric$speed)
+car_mlogit_numeric$pollution <- as.numeric(car_mlogit_numeric$pollution)
+car_mlogit_numeric$size <- as.numeric(car_mlogit_numeric$size)
+car_mlogit_numeric$space <- as.numeric(car_mlogit_numeric$space)
+car_mlogit_numeric$cost <- as.numeric(car_mlogit_numeric$cost)
+car_mlogit_numeric$station <- as.numeric(car_mlogit_numeric$station)
+car_mlogit_numeric$idx <- NULL
+
+pairs(car_mlogit_numeric, upper.panel = NULL)
+```
+
+
+```{r segmentation}
+#segmentation example
+sf_work <- read_rds("data/worktrips.rds")
+
+base_model <- mlogit(chosen ~ tvtt + cost | wkempden, data = sf_work)
+withincome <- mlogit(chosen ~ tvtt + cost | hhinc + wkempden, data = sf_work)
+highincome <- mlogit(chosen ~ tvtt + cost | hhinc + wkempden, 
+                     data = sf_work %>% filter(hhinc > 50))
+low_income <- mlogit(chosen ~ tvtt + cost | hhinc + wkempden, 
+                     data = sf_work %>% filter(hhinc <= 50))
+
+list(
+  "Base" = base_model,
+  "Income" = withincome,
+  "High Income" = highincome,
+  "Low Income"  = low_income
+) %>%
+  modelsummary(fmt = "%.5f", stars = TRUE, statistic_vertical = TRUE)
+```
