@@ -1,0 +1,29 @@
+---
+title: "Final Exam"
+author: "Logan Bennett"
+date: "4/17/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(mlogit)
+library(tidyverse)
+library(modelsummary)
+library(haven)
+library(knitr)
+library(kableExtra)
+```
+
+## Data
+
+For this analysis, a dataset is provided from responses of individuals to the National Household Travel Survey. I must first load the data and format it in a way that I can do choice modeling.
+
+```{r data setup}
+# load dap object into workspace
+dap <- read_rds(url("https://github.com/byu-transpolab/wheelchair_cdap2/raw/master/data/person_dap.rds"))
+# show first ten rows of data
+dap
+#Convert data into a choice modeling dataset
+choice_data <- dfidx(dap, choice = "dap2", idnames = "id", shape = "wide")
+```
+
