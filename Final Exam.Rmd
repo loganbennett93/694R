@@ -3,11 +3,14 @@ title: "Final Exam"
 author: "Logan Bennett"
 date: "4/17/2021"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
-```{r setup, include=FALSE}
+```{r setup}
 library(mlogit)
 library(tidyverse)
+library(dplyr)
 library(modelsummary)
 library(haven)
 library(knitr)
@@ -24,6 +27,33 @@ dap <- read_rds(url("https://github.com/byu-transpolab/wheelchair_cdap2/raw/mast
 # show first ten rows of data
 dap
 #Convert data into a choice modeling dataset
-choice_data <- dfidx(dap, choice = "dap2", idnames = "id", shape = "wide")
+choice_data <- dfidx(dap, choice = "dap2", idnames = "id", shape = "wide") %>%
+  mutate("vehperperson" = hhvehcnt / hhsize)
+#show the data of the first two respondents
+head(choice_data, 12)
 ```
 
+Initial observation of the data indicates that all the variables included are dependent on the respondent and do not vary between choice alternatives. This means that there will be no generic coefficients included in the models. Rather, all model estimates will be alternative specific. It is observed that the order of choice alternatives is the same for each respondent (H, NM, S_1, S_2, W_1, and W_2) and therefore I can include intercepts into the models for the respective options. 
+
+## Model Iteration and Statistical Analysis
+
+The goal of choice modeling on this dataset will be to identify a model that best describes the choices that people make. Significance should be ascertained for several variables that explain the majority of the variability between choices, and the intercepts should not provide the majority of the explanation. In order to determine the best model, model iterations will be compared and scrutinized for statistical significance and behavioral intuitiveness. Alternative representations will be investigated and statistical goodness of fit tests performed between candidate models. Additional iterations may include but are not limited to data segmentation and nesting structures.
+
+I will first compare some basic models that to me intuitively would describe the daily activity pattern than a person will include. It seems clear to me that the ability to make trips in the first place depends on the availability of vehicles to the household. The base model will include solely the number of vehicles in the household. A second model will include only household size. A third will include both of these. I will then evaluate the effectiveness of an alternative representation of model parameters by comparing these models to another with a mutated variable, the number of vehicles per person. I imagine that independently, the number of vehicles and household size will influence the number of trips made, but the number of vehicles per person in the household will be more telling of what trip making potential a person has. The base and first iteration models are found below along with a summary.
+
+```{r iteration 1 models}
+Modbase <- mlogit(dap2 ~ 1 | hhvehcnt, data = choice_data)
+Mod1 <- mlogit(dap2 ~ 1 | hhsize, data = choice_data)
+Mod2 <- mlogit(dap2 ~ 1 | hhvehcnt + hhsize, data = choice_data)
+Mod3 <- mlogit(dap2 ~ 1 | vehperperson, data = choice_data)
+
+list(
+  "HH Vehicles" = Modbase,
+  "HH Size" = Mod1,
+  "HH Vehicles and HH Size" = Mod2,
+  "Vehicles per HH Member" = Mod3
+) %>%
+  modelsummary(fmt = "%.5f", stars = TRUE, statistic_vertical = TRUE)
+```
+
+The initial observation from the model summary above is that 
