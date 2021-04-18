@@ -158,18 +158,47 @@ It can be seen from the table that the nesting structures helped provide a bette
 
 ## Segmentation Analysis
 
-Market segmentation can give us additional insights into how the socioeconomic variables affect daily activity patterns. A couple of market segmentation analyses will be run on the current model to evaluate these differences. First, a segmentation on workers vs. non-workers will be made, since it is expected that this is a key distinction between several of the alternatives. I also imagine that household income will play a role in the ability or willingness of people to make trip types. For instance, low income drivers may be required to work multiple jobs or report to shifts at a physical location without the option of telecommuting. (This 2017 data is not affected by the recent COVID-19 pandemic, but the need to be at work physically is still a distinguishing factor for certain types of jobs). I will last look at segmentation of sex and see how patterns differ for males and females.
+Market segmentation can give us additional insights into how the socioeconomic variables affect daily activity patterns. A couple of market segmentation analyses will be run on the current model to evaluate these differences. First, a segmentation on workers vs. non-workers will be made, since it is expected that this is a key distinction between several of the alternatives. I also imagine that household income will play a role in the ability or willingness of people to make trip types. For instance, low income drivers may be required to work multiple jobs or report to shifts at a physical location without the option of telecommuting. (This 2017 data is not affected by the recent COVID-19 pandemic, but the need to be at work physically is still a distinguishing factor for certain types of jobs).
 
 ```{r worker segmentation}
+Mod5 <- mlogit(dap2 ~ 1 | hhvehcnt + hhsize + r_age, data = choice_data)
+Mod10 <- mlogit(dap2 ~ 1 | hhvehcnt + hhsize + r_age, 
+                data = choice_data %>% filter(worker == "Yes"))
+Mod11 <- mlogit(dap2 ~ 1 | hhvehcnt + hhsize + r_age, 
+                data = choice_data %>% filter(worker == "No"))
 
-
-#base_model <- mlogit(chosen ~ tvtt + cost | wkempden, data = sf_work)
-#withincome <- mlogit(chosen ~ tvtt + cost | hhinc + wkempden, data = sf_work)
-#highincome <- mlogit(chosen ~ tvtt + cost | hhinc + wkempden, 
-#                     data = sf_work %>% filter(hhinc > 50))
-#low_income <- mlogit(chosen ~ tvtt + cost | hhinc + wkempden, 
-#                     data = sf_work %>% filter(hhinc <= 50))
-
+list(
+  "Model 5" = Mod5,
+  "Mod10- Worker" = Mod10,
+  "Mod11- Non-worker" = Mod11
+) %>%
+  modelsummary(fmt = "%.5f", stars = TRUE, statistic_vertical = TRUE)
 ```
 
+Not surprisingly, the alternative specific coefficients relative to the work trips are lower for non-workers than for workers with regards to household size and age. However, as the number of vehicles in a household increase, the non-workers are counterintuitively more likely to make work trips than workers (e.g. the coefficient for 1 work tour of a worker is **`r round(coef(Mod10)["hhvehcnt:W_1"], 5)`** and the same coefficent for a non-worker is **`r round(coef(Mod11)["hhvehcnt:W_1"], 5)`**). In general, the workers seem more sensitive to age, household size, and household vehicles. One thing to note is that the intercepts of the segmented models are less significant, which means that the data is explained more by the coefficients. The Log Likelihood values of the segmented models are much smaller, insinuating that segmenting the model by workers and non-workers can provide more accurate estimates of behavior than the model with these pooled together. A similar segmentation analysis will be performed for income level below.
 
+```{r income segmentation}
+Mod5 <- mlogit(dap2 ~ 1 | hhvehcnt + hhsize + r_age, data = choice_data)
+Mod12 <- mlogit(dap2 ~ 1 | hhvehcnt + hhsize + r_age, 
+                data = choice_data %>% filter(hhfaminc == "Less than $10,000" | hhfaminc == "$15,000 to $24,999" | hhfaminc == "$25,000 to $34,999"))
+Mod13 <- mlogit(dap2 ~ 1 | hhvehcnt + hhsize + r_age, 
+                data = choice_data %>% filter(hhfaminc == "$35,000 to $49,999" | hhfaminc == "$50,000 to $74,999" | hhfaminc == "$75,000 to $99,999"))
+Mod14 <- mlogit(dap2 ~ 1 | hhvehcnt + hhsize + r_age, 
+                data = choice_data %>% filter(hhfaminc == "$100,000 to $124,999" | hhfaminc == "$125,000 to $149,999" | hhfaminc == "$150,000 to $199,999" | hhfaminc == "$200,000 or more"))
+
+list(
+  "Model 5" = Mod5,
+  "Mod12- Low Income" = Mod12,
+  "Mod13- Middle Class" = Mod13,
+  "Mod14- Upper class" = Mod14
+) %>%
+  modelsummary(fmt = "%.5f", stars = TRUE, statistic_vertical = TRUE)
+```
+
+In the analysis above, low income households were considered to be those making less than 35,000 dollars a year, middle class households were considered to be those making between 35,000 and 100,000 dollars a year, and upper class households were considered to be those making more than 100,000 dollars a year. As the household vehicles increase, the lower class group seems to be most likely to make work trips (estimate is **`r round(coef(Mod12)["hhvehcnt:W_1"], 5)`**), followed by middle class groups (estimate is **`r round(coef(Mod13)["hhvehcnt:W_1"], 5)`**), and finally upper class groups (estimate is **`r round(coef(Mod14)["hhvehcnt:W_1"], 5)`**) whose utility for such trips is actually negative, though these estimates are not partucularly significant. This could be due to the ability of upper class workers to perform their work functions from home, when compared to lower class worker requirements to be at their place of occupation. A second work trip is more probably for upper class workers, who may have more flexibility to leave work and return later in the day. There are significant effects of household size on all groups with respect to work trips, and middle class groups seem to be most sensitive (negatively) to the effects of household size, followed by low income groups and upper class groups. Judging off the Log Likelihood values of the segmented models compared to the unsegmented model, it also appears that segmented models can more accurately describe behavior than the pooled model.
+
+## Conclusion
+
+We have looked at a number of models that describe the choice of daily activity patterns made by respondents to the National Household Travel Survey. Analyses have been performed to evaluate the influence of several socioeconomic factors such as the number of vehicles in a household, household size, age, race, worker status, and household income. Analyses of nesting structures indicated that nesting structures are useful, but the results were somewhat confounded. Segmented models were shown to provide better indication of behavior for certian groups, rather than including all groups together. In conclusion, the model that I believe best represents the choices made by the respondents is a model including household vehicles, household size, and age that is segmented by income level. These models provided low Log Likelihood values, demonstrated reasonable differences in sensitivity between the groups, and had a good proportion of significant variables which explained the choice, when compared to segmentation by worker status. 
+
+(I could provide additional analyses on segmentation by sex, education, and race, but I feel that my work here is an accurate example of my understanding of the choice modeling process. Models could of course be imrpoved with more time and investigation, but I believe this is a good model, given the dataset and the variables that can be included in a model without it being singular).
