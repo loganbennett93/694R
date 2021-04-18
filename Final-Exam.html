@@ -593,32 +593,6 @@ summary {
 </div>
 
 
-<pre class="r"><code>library(mlogit)</code></pre>
-<pre><code>## Loading required package: dfidx</code></pre>
-<pre><code>## 
-## Attaching package: &#39;dfidx&#39;</code></pre>
-<pre><code>## The following object is masked from &#39;package:stats&#39;:
-## 
-##     filter</code></pre>
-<pre class="r"><code>library(tidyverse)</code></pre>
-<pre><code>## -- Attaching packages --------------------------------------- tidyverse 1.3.0 --</code></pre>
-<pre><code>## v ggplot2 3.3.2     v purrr   0.3.4
-## v tibble  3.1.0     v dplyr   1.0.5
-## v tidyr   1.1.2     v stringr 1.4.0
-## v readr   1.3.1     v forcats 0.5.0</code></pre>
-<pre><code>## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
-## x dplyr::filter() masks dfidx::filter(), stats::filter()
-## x dplyr::lag()    masks stats::lag()</code></pre>
-<pre class="r"><code>library(dplyr)
-library(modelsummary)
-library(haven)
-library(knitr)
-library(kableExtra)</code></pre>
-<pre><code>## 
-## Attaching package: &#39;kableExtra&#39;</code></pre>
-<pre><code>## The following object is masked from &#39;package:dplyr&#39;:
-## 
-##     group_rows</code></pre>
 <div id="data" class="section level2">
 <h2>Data</h2>
 <p>For this analysis, a dataset is provided from responses of individuals to the National Household Travel Survey. I must first load the data and format it in a way that I can do choice modeling.</p>
@@ -713,12 +687,14 @@ head(choice_data, 12)</code></pre>
 Mod1 &lt;- mlogit(dap2 ~ 1 | hhsize, data = choice_data)
 Mod2 &lt;- mlogit(dap2 ~ 1 | hhvehcnt + hhsize, data = choice_data)
 Mod3 &lt;- mlogit(dap2 ~ 1 | vehperperson, data = choice_data)
+Mod4 &lt;- mlogit(dap2 ~ 1 | hhvehcnt + hhsize + vehperperson, data = choice_data)
 
 list(
-  &quot;HH Vehicles&quot; = Modbase,
-  &quot;HH Size&quot; = Mod1,
-  &quot;HH Vehicles and HH Size&quot; = Mod2,
-  &quot;Vehicles per HH Member&quot; = Mod3
+  &quot;Base - HH Vehicles&quot; = Modbase,
+  &quot;Mod1- HH Size&quot; = Mod1,
+  &quot;Mod2- HH Vehicles and HH Size&quot; = Mod2,
+  &quot;Mod3- Vehicles per HH Member&quot; = Mod3,
+  &quot;All Previous Variables&quot; = Mod4
 ) %&gt;%
   modelsummary(fmt = &quot;%.5f&quot;, stars = TRUE, statistic_vertical = TRUE)</code></pre>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
@@ -727,16 +703,19 @@ list(
 <th style="text-align:left;">
 </th>
 <th style="text-align:center;">
-HH Vehicles
+Base - HH Vehicles
 </th>
 <th style="text-align:center;">
-HH Size
+Mod1- HH Size
 </th>
 <th style="text-align:center;">
-HH Vehicles and HH Size
+Mod2- HH Vehicles and HH Size
 </th>
 <th style="text-align:center;">
-Vehicles per HH Member
+Mod3- Vehicles per HH Member
+</th>
+<th style="text-align:center;">
+All Previous Variables
 </th>
 </tr>
 </thead>
@@ -757,6 +736,9 @@ Vehicles per HH Member
 <td style="text-align:center;">
 0.73274***
 </td>
+<td style="text-align:center;">
+0.61232***
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -772,6 +754,9 @@ Vehicles per HH Member
 </td>
 <td style="text-align:center;">
 (0.06532)
+</td>
+<td style="text-align:center;">
+(0.13709)
 </td>
 </tr>
 <tr>
@@ -790,6 +775,9 @@ Vehicles per HH Member
 <td style="text-align:center;">
 -2.57109***
 </td>
+<td style="text-align:center;">
+-2.94965***
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -805,6 +793,9 @@ Vehicles per HH Member
 </td>
 <td style="text-align:center;">
 (0.23378)
+</td>
+<td style="text-align:center;">
+(0.52886)
 </td>
 </tr>
 <tr>
@@ -823,6 +814,9 @@ Vehicles per HH Member
 <td style="text-align:center;">
 -4.81251***
 </td>
+<td style="text-align:center;">
+-4.02776***
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -838,6 +832,9 @@ Vehicles per HH Member
 </td>
 <td style="text-align:center;">
 (0.70967)
+</td>
+<td style="text-align:center;">
+(1.42567)
 </td>
 </tr>
 <tr>
@@ -856,6 +853,9 @@ Vehicles per HH Member
 <td style="text-align:center;">
 0.33395***
 </td>
+<td style="text-align:center;">
+-0.34969**
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -871,6 +871,9 @@ Vehicles per HH Member
 </td>
 <td style="text-align:center;">
 (0.06837)
+</td>
+<td style="text-align:center;">
+(0.14434)
 </td>
 </tr>
 <tr>
@@ -889,6 +892,9 @@ Vehicles per HH Member
 <td style="text-align:center;">
 -2.79131***
 </td>
+<td style="text-align:center;">
+-3.13069***
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -905,6 +911,9 @@ Vehicles per HH Member
 <td style="text-align:center;">
 (0.16149)
 </td>
+<td style="text-align:center;">
+(0.33534)
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -920,6 +929,9 @@ hhvehcnt × NM
 </td>
 <td style="text-align:center;">
 </td>
+<td style="text-align:center;">
+-0.21178***
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -933,6 +945,9 @@ hhvehcnt × NM
 (0.03113)
 </td>
 <td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.06596)
 </td>
 </tr>
 <tr>
@@ -949,6 +964,9 @@ hhvehcnt × S_1
 </td>
 <td style="text-align:center;">
 </td>
+<td style="text-align:center;">
+0.53416**
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -962,6 +980,9 @@ hhvehcnt × S_1
 (0.09469)
 </td>
 <td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.20920)
 </td>
 </tr>
 <tr>
@@ -978,6 +999,9 @@ hhvehcnt × S_2
 </td>
 <td style="text-align:center;">
 </td>
+<td style="text-align:center;">
+1.03248*
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -991,6 +1015,9 @@ hhvehcnt × S_2
 (0.28541)
 </td>
 <td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.60885)
 </td>
 </tr>
 <tr>
@@ -1007,6 +1034,9 @@ hhvehcnt × W_1
 </td>
 <td style="text-align:center;">
 </td>
+<td style="text-align:center;">
+-0.11573*
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -1020,6 +1050,9 @@ hhvehcnt × W_1
 (0.03180)
 </td>
 <td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.06630)
 </td>
 </tr>
 <tr>
@@ -1036,6 +1069,9 @@ hhvehcnt × W_2
 </td>
 <td style="text-align:center;">
 </td>
+<td style="text-align:center;">
+-0.09062
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -1049,6 +1085,9 @@ hhvehcnt × W_2
 (0.07323)
 </td>
 <td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.14644)
 </td>
 </tr>
 <tr>
@@ -1065,6 +1104,9 @@ hhsize × NM
 </td>
 <td style="text-align:center;">
 </td>
+<td style="text-align:center;">
+0.08619*
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -1078,6 +1120,9 @@ hhsize × NM
 (0.02704)
 </td>
 <td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.05009)
 </td>
 </tr>
 <tr>
@@ -1094,6 +1139,9 @@ hhsize × S_1
 </td>
 <td style="text-align:center;">
 </td>
+<td style="text-align:center;">
+0.01221
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -1107,6 +1155,9 @@ hhsize × S_1
 (0.07542)
 </td>
 <td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.16102)
 </td>
 </tr>
 <tr>
@@ -1123,6 +1174,9 @@ hhsize × S_2
 </td>
 <td style="text-align:center;">
 </td>
+<td style="text-align:center;">
+-0.42398
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -1136,6 +1190,9 @@ hhsize × S_2
 (0.24345)
 </td>
 <td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.50253)
 </td>
 </tr>
 <tr>
@@ -1152,6 +1209,9 @@ hhsize × W_1
 </td>
 <td style="text-align:center;">
 </td>
+<td style="text-align:center;">
+0.22919***
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -1165,6 +1225,9 @@ hhsize × W_1
 (0.02744)
 </td>
 <td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.05086)
 </td>
 </tr>
 <tr>
@@ -1181,6 +1244,9 @@ hhsize × W_2
 </td>
 <td style="text-align:center;">
 </td>
+<td style="text-align:center;">
+0.11865
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -1194,6 +1260,9 @@ hhsize × W_2
 (0.07573)
 </td>
 <td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.12428)
 </td>
 </tr>
 <tr>
@@ -1209,6 +1278,9 @@ vehperperson × NM
 <td style="text-align:center;">
 0.33101***
 </td>
+<td style="text-align:center;">
+0.70716***
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -1221,6 +1293,9 @@ vehperperson × NM
 </td>
 <td style="text-align:center;">
 (0.06619)
+</td>
+<td style="text-align:center;">
+(0.14849)
 </td>
 </tr>
 <tr>
@@ -1236,6 +1311,9 @@ vehperperson × S_1
 <td style="text-align:center;">
 -0.29569
 </td>
+<td style="text-align:center;">
+-1.30515**
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -1248,6 +1326,9 @@ vehperperson × S_1
 </td>
 <td style="text-align:center;">
 (0.25723)
+</td>
+<td style="text-align:center;">
+(0.61266)
 </td>
 </tr>
 <tr>
@@ -1263,6 +1344,9 @@ vehperperson × S_2
 <td style="text-align:center;">
 -0.34435
 </td>
+<td style="text-align:center;">
+-2.65604
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -1275,6 +1359,9 @@ vehperperson × S_2
 </td>
 <td style="text-align:center;">
 (0.79125)
+</td>
+<td style="text-align:center;">
+(1.73547)
 </td>
 </tr>
 <tr>
@@ -1290,6 +1377,9 @@ vehperperson × W_1
 <td style="text-align:center;">
 0.41904***
 </td>
+<td style="text-align:center;">
+0.79556***
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -1302,6 +1392,9 @@ vehperperson × W_1
 </td>
 <td style="text-align:center;">
 (0.06847)
+</td>
+<td style="text-align:center;">
+(0.15256)
 </td>
 </tr>
 <tr>
@@ -1317,6 +1410,9 @@ vehperperson × W_2
 <td style="text-align:center;">
 0.69410***
 </td>
+<td style="text-align:center;">
+0.94910***
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -1330,10 +1426,16 @@ vehperperson × W_2
 <td style="text-align:center;">
 (0.13885)
 </td>
+<td style="text-align:center;">
+(0.30291)
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
 Num.Obs.
+</td>
+<td style="text-align:center;">
+8845
 </td>
 <td style="text-align:center;">
 8845
@@ -1364,10 +1466,15 @@ AIC
 <td style="text-align:center;">
 20325.2
 </td>
+<td style="text-align:center;">
+20198.6
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
 BIC
+</td>
+<td style="text-align:center;">
 </td>
 <td style="text-align:center;">
 </td>
@@ -1394,6 +1501,9 @@ Log.Lik.
 <td style="text-align:center;">
 -10152.591
 </td>
+<td style="text-align:center;">
+-10079.308
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -1410,6 +1520,9 @@ rho2
 </td>
 <td style="text-align:center;">
 0.00270
+</td>
+<td style="text-align:center;">
+0.00990
 </td>
 </tr>
 <tr>
@@ -1428,6 +1541,9 @@ rho20
 <td style="text-align:center;">
 0.35938
 </td>
+<td style="text-align:center;">
+0.36401
+</td>
 </tr>
 </tbody>
 <tfoot>
@@ -1438,7 +1554,2695 @@ rho20
 </tr>
 </tfoot>
 </table>
-<p>The initial observation from the model summary above is that</p>
+<p>The initial observation from the model summary above is that the intercepts for the several activity pattern choices are all significant. This means that more of the explanation for the choices is given by the intercepts than by the variables included, which is a problem. Additional iterations with more variables will need to be evaluated. In all cases where household vehicles are included the models indicate that as that number increases, the utility of a choice increases, which makes sense. It is assumed that a greater availability of vehicles would translate to more trip potential. Similarly,</p>
+<p>I would expect that as the household size increases, the ability to make more trips decreases. Interestingly though, the household size is estimated to provide a disutility to only non-mandatory activities and those making two works tours. For instance, according to both models with household size included, there is a significant increase in utility for one school trip as household size increases, with coefficient estimates for Mod1 and Mod2 of <strong>0.32541</strong> and <strong>0.25922</strong>, respectively. This could be related to the fact that larger households likely have more children, and carpooling may take place between children. More members in a family could also be related to a higher number of workers. This may explain the positive relationship between household size and a one work tour pattern, whereas shared resources between more family members might make two work tours less possible (indicated by negative coefficients for models Mod1 and Mod2 of <strong>-0.04182</strong> and <strong>-0.16122</strong>), though not as significantly.</p>
+<p>The relationship between trip making potential, the number of available vehicles, and household size may be explained by the number of vehicles per person in a household. The results indicate that there is a significant benefit for those making non-mandatory trips, or work trips of one or two tours, indicated by the respective estimates <strong>0.33101</strong>, <strong>0.41904</strong>, and <strong>0.6941</strong>. It makes sense that as the number of vehicles per person increases, non-mandatory trips may increase, since otherwise mandatory trips would take precedence. Work trips are also expected to be higher with a greater number of vehicles per person, though this may be related to ability to afford more vehicles with more workers. Interestingly, as the number of cars per person goes up, the utility goes down for school trips (though not significantly, indicated by SE values of <strong>0.25723</strong> for single school tours and <strong>0.79125</strong> for two school tours). I expect that those working would be more able to afford cars to get to work, and that most households with students may have less people and therefore less cars.</p>
+<p>However, the last model performed, including household vehicles, household size, and the number of vehicles per person had some unexpected results. For instance the coefficient for the household vehicles switched from a positive coefficient in the other models to a negative coefficient with the addition of this variable, with an estimate of <strong>-0.21178</strong>. This is somewhat counterintuitive since more vehicles should not be a detriment to the potential for trips, unless it is confounded with other socioeconomic variables. Similar changes occur for work trips by number of vehicles, as well as some trips by household size. For these reasons, thought that model has a higher log likelihood than the other models, the variable of vehicles per person is chosen not to be included in additional models.</p>
+<p>I will use log likelihood ratio tests to observe goodness of fit between the models and determine which of the variables should be included. A summary of those tests is found below.</p>
+<pre class="r"><code>#Create likelihood ratio test table
+tibble(
+  &quot;$H_0$&quot; = c(&quot;Including household vehicle count makes no difference&quot;,&quot;Including hhsize makes no difference&quot;),
+  LL_U = rep(Mod2$logLik, 2),
+  LL_R = c(Modbase$logLik, Mod1$logLik)
+) %&gt;%
+  mutate(
+    test_stat = -2 * (LL_R - LL_U),
+    df = c(5, 5),
+    &quot;Crtical Chi-Squared at 99.9% Conf.&quot; = qchisq(0.999, df),
+    &quot;P-value&quot; = pchisq(test_stat, df, lower.tail = FALSE)
+  ) %&gt;%
+  kbl(align = &#39;c&#39;, caption = &quot;Likelihood Ratio Test for Household Vehicle and Household Size Inclusion$&quot;) %&gt;%
+  kable_styling()</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Likelihood Ratio Test for Household Vehicle and Household Size Inclusion$
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+<span class="math inline">\(H_0\)</span>
+</th>
+<th style="text-align:center;">
+LL_U
+</th>
+<th style="text-align:center;">
+LL_R
+</th>
+<th style="text-align:center;">
+test_stat
+</th>
+<th style="text-align:center;">
+df
+</th>
+<th style="text-align:center;">
+Crtical Chi-Squared at 99.9% Conf.
+</th>
+<th style="text-align:center;">
+P-value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+Including household vehicle count makes no difference
+</td>
+<td style="text-align:center;">
+-10102.8
+</td>
+<td style="text-align:center;">
+-10129.72
+</td>
+<td style="text-align:center;">
+53.82268
+</td>
+<td style="text-align:center;">
+5
+</td>
+<td style="text-align:center;">
+20.51501
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Including hhsize makes no difference
+</td>
+<td style="text-align:center;">
+-10102.8
+</td>
+<td style="text-align:center;">
+-10130.03
+</td>
+<td style="text-align:center;">
+54.44997
+</td>
+<td style="text-align:center;">
+5
+</td>
+<td style="text-align:center;">
+20.51501
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+</tbody>
+</table>
+<p>Using Mod2 with both hhsize and hhvehcnt as the unrestricted model in both cases, tests were run with Modbase and Mod1 to determine the respective significance of including hhvehcnt and hhsize. In both cases, with 5 degrees of freedom, the test statistics indicate with strong evidence (<span class="math inline">\(P-value = 0\)</span>) that these two variables should not be excluded from the models.</p>
+<p>The next iteration of models will include socioeconomic variables of age and race to see what effects these variables have on the model. Other socioeconomic variables such as sex, household income, education, and Hispanic status are highly collinear with choice, and cannot be included in models at this point, but they can be included in segmentation analysis later.</p>
+<pre class="r"><code>Mod2 &lt;- mlogit(dap2 ~ 1 | hhvehcnt + hhsize, data = choice_data)
+Mod5 &lt;- mlogit(dap2 ~ 1 | hhvehcnt + hhsize + r_age, data = choice_data)
+Mod6 &lt;- mlogit(dap2 ~ 1 | hhvehcnt + hhsize + r_race, data = choice_data)
+
+list(
+  &quot;Mod2- HH Vehicles and HH Size&quot; = Mod2,
+  &quot;Mod5- With Age&quot; = Mod5,
+  &quot;Mod6- With Race&quot; = Mod6
+) %&gt;%
+  modelsummary(fmt = &quot;%.5f&quot;, stars = TRUE, statistic_vertical = TRUE)</code></pre>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:center;">
+Mod2- HH Vehicles and HH Size
+</th>
+<th style="text-align:center;">
+Mod5- With Age
+</th>
+<th style="text-align:center;">
+Mod6- With Race
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+(Intercept) × NM
+</td>
+<td style="text-align:center;">
+1.16191***
+</td>
+<td style="text-align:center;">
+1.62123***
+</td>
+<td style="text-align:center;">
+1.22957***
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.07528)
+</td>
+<td style="text-align:center;">
+(0.16365)
+</td>
+<td style="text-align:center;">
+(0.07773)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+(Intercept) × S_1
+</td>
+<td style="text-align:center;">
+-3.97893***
+</td>
+<td style="text-align:center;">
+2.93738***
+</td>
+<td style="text-align:center;">
+-4.03777***
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.28090)
+</td>
+<td style="text-align:center;">
+(0.50092)
+</td>
+<td style="text-align:center;">
+(0.28836)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+(Intercept) × S_2
+</td>
+<td style="text-align:center;">
+-6.09970***
+</td>
+<td style="text-align:center;">
+-0.32339
+</td>
+<td style="text-align:center;">
+-5.89116***
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.84984)
+</td>
+<td style="text-align:center;">
+(1.40459)
+</td>
+<td style="text-align:center;">
+(0.86189)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+(Intercept) × W_1
+</td>
+<td style="text-align:center;">
+0.27978***
+</td>
+<td style="text-align:center;">
+3.53403***
+</td>
+<td style="text-align:center;">
+0.32141***
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.07951)
+</td>
+<td style="text-align:center;">
+(0.16914)
+</td>
+<td style="text-align:center;">
+(0.08189)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+(Intercept) × W_2
+</td>
+<td style="text-align:center;">
+-2.35314***
+</td>
+<td style="text-align:center;">
+1.40753***
+</td>
+<td style="text-align:center;">
+-2.28086***
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.20198)
+</td>
+<td style="text-align:center;">
+(0.35852)
+</td>
+<td style="text-align:center;">
+(0.20694)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hhvehcnt × NM
+</td>
+<td style="text-align:center;">
+0.06442**
+</td>
+<td style="text-align:center;">
+0.06425**
+</td>
+<td style="text-align:center;">
+0.04306
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.03113)
+</td>
+<td style="text-align:center;">
+(0.03114)
+</td>
+<td style="text-align:center;">
+(0.03151)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hhvehcnt × S_1
+</td>
+<td style="text-align:center;">
+0.19635**
+</td>
+<td style="text-align:center;">
+0.20721**
+</td>
+<td style="text-align:center;">
+0.17593*
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.09469)
+</td>
+<td style="text-align:center;">
+(0.09814)
+</td>
+<td style="text-align:center;">
+(0.09678)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hhvehcnt × S_2
+</td>
+<td style="text-align:center;">
+0.23662
+</td>
+<td style="text-align:center;">
+0.28281
+</td>
+<td style="text-align:center;">
+0.20301
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.28541)
+</td>
+<td style="text-align:center;">
+(0.29049)
+</td>
+<td style="text-align:center;">
+(0.29378)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hhvehcnt × W_1
+</td>
+<td style="text-align:center;">
+0.18991***
+</td>
+<td style="text-align:center;">
+0.22556***
+</td>
+<td style="text-align:center;">
+0.17435***
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.03180)
+</td>
+<td style="text-align:center;">
+(0.03282)
+</td>
+<td style="text-align:center;">
+(0.03214)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hhvehcnt × W_2
+</td>
+<td style="text-align:center;">
+0.28644***
+</td>
+<td style="text-align:center;">
+0.33451***
+</td>
+<td style="text-align:center;">
+0.26749***
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.07323)
+</td>
+<td style="text-align:center;">
+(0.07401)
+</td>
+<td style="text-align:center;">
+(0.07391)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hhsize × NM
+</td>
+<td style="text-align:center;">
+-0.10798***
+</td>
+<td style="text-align:center;">
+-0.13715***
+</td>
+<td style="text-align:center;">
+-0.09202***
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.02704)
+</td>
+<td style="text-align:center;">
+(0.02839)
+</td>
+<td style="text-align:center;">
+(0.02745)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hhsize × S_1
+</td>
+<td style="text-align:center;">
+0.25922***
+</td>
+<td style="text-align:center;">
+-0.12493
+</td>
+<td style="text-align:center;">
+0.25909***
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.07542)
+</td>
+<td style="text-align:center;">
+(0.09102)
+</td>
+<td style="text-align:center;">
+(0.07809)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hhsize × S_2
+</td>
+<td style="text-align:center;">
+0.17561
+</td>
+<td style="text-align:center;">
+-0.20519
+</td>
+<td style="text-align:center;">
+0.19381
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.24345)
+</td>
+<td style="text-align:center;">
+(0.28433)
+</td>
+<td style="text-align:center;">
+(0.24621)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hhsize × W_1
+</td>
+<td style="text-align:center;">
+0.01137
+</td>
+<td style="text-align:center;">
+-0.23881***
+</td>
+<td style="text-align:center;">
+0.02056
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.02744)
+</td>
+<td style="text-align:center;">
+(0.03016)
+</td>
+<td style="text-align:center;">
+(0.02787)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hhsize × W_2
+</td>
+<td style="text-align:center;">
+-0.16122**
+</td>
+<td style="text-align:center;">
+-0.46146***
+</td>
+<td style="text-align:center;">
+-0.15167**
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.07573)
+</td>
+<td style="text-align:center;">
+(0.08167)
+</td>
+<td style="text-align:center;">
+(0.07691)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_age × NM
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-0.00666***
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.00205)
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_age × S_1
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-0.13855***
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.01131)
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_age × S_2
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-0.10607***
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.02746)
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_age × W_1
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-0.05122***
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.00224)
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_age × W_2
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-0.06015***
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.00529)
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceBlack or African American × NM
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-0.34836***
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.10925)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceBlack or African American × S_1
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-0.31342
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.47733)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceBlack or African American × S_2
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-15.39169
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(2280.16877)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceBlack or African American × W_1
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-0.27804**
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.11635)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceBlack or African American × W_2
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-0.46878
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.34126)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceAsian × NM
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-0.36698***
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.10834)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceAsian × S_1
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+0.19021
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.34802)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceAsian × S_2
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-0.17127
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(1.08460)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceAsian × W_1
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-0.23379**
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.11230)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceAsian × W_2
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-0.09603
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.28976)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceAmerican Indian or Alaska Native × NM
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+0.55377
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.54936)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceAmerican Indian or Alaska Native × S_1
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-16.93399
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(10115.77641)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceAmerican Indian or Alaska Native × S_2
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-14.94827
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(10164.07482)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceAmerican Indian or Alaska Native × W_1
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+0.51928
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.57013)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceAmerican Indian or Alaska Native × W_2
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+1.43122
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.87444)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceNative Hawaiian or other Pacific Islander × NM
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+0.43841
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.78292)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceNative Hawaiian or other Pacific Islander × S_1
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-22.55639
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(236500.20302)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceNative Hawaiian or other Pacific Islander × S_2
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-20.56000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(236160.98184)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceNative Hawaiian or other Pacific Islander × W_1
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-1.43415
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(1.22755)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceNative Hawaiian or other Pacific Islander × W_2
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-23.29262
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(236293.48850)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceMultiple responses selected × NM
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-0.08107
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.20628)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceMultiple responses selected × S_1
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+1.61350***
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.40140)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceMultiple responses selected × S_2
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-15.12844
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(3879.34855)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceMultiple responses selected × W_1
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+0.12719
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.21072)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceMultiple responses selected × W_2
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-0.04353
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.53744)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceRefused × NM
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+0.92971*
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.53358)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceRefused × S_1
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+2.20950**
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.87892)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceRefused × S_2
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-14.41371
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(7750.71666)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceRefused × W_1
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+1.11067**
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.53934)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceRefused × W_2
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+1.38025
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.87171)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceSome other race × NM
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-0.29782
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.18608)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceSome other race × S_1
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+0.14277
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.61409)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceSome other race × S_2
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-15.41815
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(3780.23579)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceSome other race × W_1
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+0.03826
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.18636)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceSome other race × W_2
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-1.66118
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(1.01579)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceDon’t know × NM
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-1.05512
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(1.00144)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceDon’t know × S_1
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-18.60628
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(32487.85581)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceDon’t know × S_2
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-16.61583
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(32701.52999)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceDon’t know × W_1
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+0.49601
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(0.80410)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_raceDon’t know × W_2
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-19.36054
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(32555.19768)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Num.Obs.
+</td>
+<td style="text-align:center;">
+8845
+</td>
+<td style="text-align:center;">
+8845
+</td>
+<td style="text-align:center;">
+8845
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AIC
+</td>
+<td style="text-align:center;">
+20235.6
+</td>
+<td style="text-align:center;">
+19073.7
+</td>
+<td style="text-align:center;">
+20245.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BIC
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Log.Lik.
+</td>
+<td style="text-align:center;">
+-10102.804
+</td>
+<td style="text-align:center;">
+-9516.850
+</td>
+<td style="text-align:center;">
+-10067.528
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rho2
+</td>
+<td style="text-align:center;">
+0.00759
+</td>
+<td style="text-align:center;">
+0.06515
+</td>
+<td style="text-align:center;">
+0.01105
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rho20
+</td>
+<td style="text-align:center;">
+0.36252
+</td>
+<td style="text-align:center;">
+0.39950
+</td>
+<td style="text-align:center;">
+0.36475
+</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="padding: 0; border:0;" colspan="100%">
+<sup></sup> * p &lt; 0.1, ** p &lt; 0.05, *** p &lt; 0.01
+</td>
+</tr>
+</tfoot>
+</table>
+<p>A few interesting things can be noted from the above models. Mod2 with hhvehcnt and hhsize has pretty similar estimates for both intercepts and coefficients related to those two variables as Mod6 when race is introduced to the model. This may indicate that there is not a strong influence of race on the relationships between household size or vehicle ownership and daily activity patterns. Observation of the estimates for different race groups may highlight some differences between these communities, whether by cultural differences or inequity. For instance, there is very high disutility for members of Black, American Indian, or Pacific Islander groups to attend school, with estimates reaching as low as <strong>-22.55639</strong>, which is the utility of Pacific Islanders making one school trip. However, the majority of these apparent discrepancies may be due to low sample size, indicated by extremely high standard errors (<strong>236500</strong> in the case of the given estimate above). Overall, the majority of estimates for the race variables are insignificant, and while the inclusion of the variable does increase the Log Likelihood from <strong>-10102.804</strong> to <strong>-10067.528</strong>, the insignificance of the majority of the estimates dissuades me from including it in further models.</p>
+<p>Unlike the race variables, the addition of age to household vehicles and household size does have significant effects. The intercepts between Mod2 and Mod5 (with age) change dramatically, and their significance is reduced in all cases, demonstrated by the larger standard errors in Mod5. The patterns of utility for number of vehicles are similar in these two models. However, there are some changes to the effect of household size when age is taken into account. Estimates of all school trips as well as work trips with one tour become significantly negative with the introduction of age. This should be expected since members of older households are no longer attending school or working, or their children of school and working age may have moved out. As expected, people tend to stay home as their age increases, indicated by the negative estimates for all daily activity patterns in the model compared to the reference level. Older drivers’ may’s pattern of non-mandatory trips, indicated by the significant estimate of <strong>-0.00666</strong>, is less affected than other trips such as school (<strong>-0.13855</strong>) or work (<strong>-0.05122</strong>).</p>
+<p>The addition of age to the model raises the Log Likelihood from <strong>-10102.804</strong> to <strong>-9516.5850</strong>, and a Log likelihood ratio test (shown below, with Mod5 as the unrestricted model and Mod2 as the restricted model) indicates with strong evidence that age should not be excluded from the model. (A Log Likelihood test on race could not be performed since the model would not run with both age and race included).</p>
+<pre class="r"><code>#Create likelihood ratio test table
+tibble(
+  &quot;$H_0$&quot; = &quot;Including age makes no difference&quot;,
+  LL_U = Mod5$logLik,
+  LL_R = Mod2$logLik
+) %&gt;%
+  mutate(
+    test_stat = -2 * (LL_R - LL_U),
+    df = 5,
+    &quot;Crtical Chi-Squared at 99.9% Conf.&quot; = qchisq(0.999, df),
+    &quot;P-value&quot; = pchisq(test_stat, df, lower.tail = FALSE)
+  ) %&gt;%
+  kbl(align = &#39;c&#39;, caption = &quot;Likelihood Ratio Test for Age Inclusion&quot;) %&gt;%
+  kable_styling()</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Likelihood Ratio Test for Age Inclusion
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+<span class="math inline">\(H_0\)</span>
+</th>
+<th style="text-align:center;">
+LL_U
+</th>
+<th style="text-align:center;">
+LL_R
+</th>
+<th style="text-align:center;">
+test_stat
+</th>
+<th style="text-align:center;">
+df
+</th>
+<th style="text-align:center;">
+Crtical Chi-Squared at 99.9% Conf.
+</th>
+<th style="text-align:center;">
+P-value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+Including age makes no difference
+</td>
+<td style="text-align:center;">
+-9516.85
+</td>
+<td style="text-align:center;">
+-10102.8
+</td>
+<td style="text-align:center;">
+1171.909
+</td>
+<td style="text-align:center;">
+5
+</td>
+<td style="text-align:center;">
+20.51501
+</td>
+<td style="text-align:center;">
+3.568776e-251
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="nesting-structures" class="section level2">
+<h2>Nesting Structures</h2>
+<p>It may be beneficial to look at the data that we have under certain nesting structures. For instance, people may first make activity pattern decisions at a higher level of whether trips are mandatory or not before making other decisions about their trips. A few alternative nesting structures are given below. The first, Mod7, has two nests, those trips that are mandatory, and those that are not. The second, Mod8, has a mandatory nest and all other trips (stay home or non-mandatory) are not nested. The third, M9, has nests of school trips and work trips (assuming that the number of trips to these locations is a decision made after the location itself), and all other trips nested together. A model summary comparing these trips to the unnested model Mod5 are shown in a summary below.</p>
+<pre class="r"><code>nest_formula &lt;- dap2 ~ 1 | hhvehcnt + hhsize + r_age
+
+Mod5 &lt;- mlogit(dap2 ~ 1 | hhvehcnt + hhsize + r_age, data = choice_data)
+Mod7 &lt;- mlogit(nest_formula, data = choice_data,
+               nests = list(Mandatory = c(&#39;S_1&#39;, &#39;S_2&#39;, &#39;W_1&#39;, &#39;W_2&#39;),  
+                            nonmandatory = c(&#39;H&#39;, &#39;NM&#39;)))
+Mod8 &lt;- mlogit(nest_formula, data = choice_data,
+               nests = list(Mandatory = c(&#39;S_1&#39;, &#39;S_2&#39;, &#39;W_1&#39;, &#39;W_2&#39;),  
+                            nonmandatory = c(&#39;H&#39;, &#39;NM&#39;)),
+               constPar = c(&quot;iv:nonmandatory&quot; = 1))
+Mod9 &lt;- mlogit(nest_formula, data = choice_data,
+               nests = list(School = c(&#39;S_1&#39;, &#39;S_2&#39;),
+                            Work = c(&#39;W_1&#39;, &#39;W_2&#39;),
+                            other = c(&#39;H&#39;, &#39;NM&#39;)))
+
+list(
+  &quot;Model 5&quot; = Mod5,
+  &quot;Model 7&quot; = Mod7,
+  &quot;Model 8&quot; = Mod8,
+  &quot;Model 9&quot; = Mod9
+) %&gt;%
+  modelsummary(fmt = &quot;%.5f&quot;, stars = TRUE, statistic_vertical = TRUE)</code></pre>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:center;">
+Model 5
+</th>
+<th style="text-align:center;">
+Model 7
+</th>
+<th style="text-align:center;">
+Model 8
+</th>
+<th style="text-align:center;">
+Model 9
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+(Intercept) × NM
+</td>
+<td style="text-align:center;">
+1.62123***
+</td>
+<td style="text-align:center;">
+-52.28248**
+</td>
+<td style="text-align:center;">
+1.60209***
+</td>
+<td style="text-align:center;">
+729.68715***
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.16365)
+</td>
+<td style="text-align:center;">
+(24.23665)
+</td>
+<td style="text-align:center;">
+(0.15575)
+</td>
+<td style="text-align:center;">
+(271.08179)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+(Intercept) × S_1
+</td>
+<td style="text-align:center;">
+2.93738***
+</td>
+<td style="text-align:center;">
+44.50058
+</td>
+<td style="text-align:center;">
+88.52475***
+</td>
+<td style="text-align:center;">
+749.88888**
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.50092)
+</td>
+<td style="text-align:center;">
+(40.80591)
+</td>
+<td style="text-align:center;">
+(30.21434)
+</td>
+<td style="text-align:center;">
+(313.89763)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+(Intercept) × S_2
+</td>
+<td style="text-align:center;">
+-0.32339
+</td>
+<td style="text-align:center;">
+180.57634**
+</td>
+<td style="text-align:center;">
+215.07098***
+</td>
+<td style="text-align:center;">
+-1623.60836
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(1.40459)
+</td>
+<td style="text-align:center;">
+(90.59493)
+</td>
+<td style="text-align:center;">
+(80.20012)
+</td>
+<td style="text-align:center;">
+(5729.28207)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+(Intercept) × W_1
+</td>
+<td style="text-align:center;">
+3.53403***
+</td>
+<td style="text-align:center;">
+-45.34046*
+</td>
+<td style="text-align:center;">
+12.48493***
+</td>
+<td style="text-align:center;">
+748.81630***
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.16914)
+</td>
+<td style="text-align:center;">
+(27.00957)
+</td>
+<td style="text-align:center;">
+(1.59753)
+</td>
+<td style="text-align:center;">
+(285.53010)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+(Intercept) × W_2
+</td>
+<td style="text-align:center;">
+1.40753***
+</td>
+<td style="text-align:center;">
+63.77396
+</td>
+<td style="text-align:center;">
+122.85098***
+</td>
+<td style="text-align:center;">
+137.93573
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.35852)
+</td>
+<td style="text-align:center;">
+(43.98386)
+</td>
+<td style="text-align:center;">
+(33.46093)
+</td>
+<td style="text-align:center;">
+(524.65987)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hhvehcnt × NM
+</td>
+<td style="text-align:center;">
+0.06425**
+</td>
+<td style="text-align:center;">
+-1.77988*
+</td>
+<td style="text-align:center;">
+0.06151**
+</td>
+<td style="text-align:center;">
+3.05988
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.03114)
+</td>
+<td style="text-align:center;">
+(0.98445)
+</td>
+<td style="text-align:center;">
+(0.02957)
+</td>
+<td style="text-align:center;">
+(2.59612)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hhvehcnt × S_1
+</td>
+<td style="text-align:center;">
+0.20721**
+</td>
+<td style="text-align:center;">
+0.90646
+</td>
+<td style="text-align:center;">
+1.36673
+</td>
+<td style="text-align:center;">
+3.89362
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.09814)
+</td>
+<td style="text-align:center;">
+(1.90485)
+</td>
+<td style="text-align:center;">
+(1.71686)
+</td>
+<td style="text-align:center;">
+(3.15946)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hhvehcnt × S_2
+</td>
+<td style="text-align:center;">
+0.28281
+</td>
+<td style="text-align:center;">
+-0.60919
+</td>
+<td style="text-align:center;">
+0.25874
+</td>
+<td style="text-align:center;">
+-12.11265
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.29049)
+</td>
+<td style="text-align:center;">
+(12.83779)
+</td>
+<td style="text-align:center;">
+(11.58624)
+</td>
+<td style="text-align:center;">
+(20.26252)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hhvehcnt × W_1
+</td>
+<td style="text-align:center;">
+0.22556***
+</td>
+<td style="text-align:center;">
+-0.72112
+</td>
+<td style="text-align:center;">
+0.46234***
+</td>
+<td style="text-align:center;">
+2.25191
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.03282)
+</td>
+<td style="text-align:center;">
+(0.68439)
+</td>
+<td style="text-align:center;">
+(0.10018)
+</td>
+<td style="text-align:center;">
+(1.69568)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hhvehcnt × W_2
+</td>
+<td style="text-align:center;">
+0.33451***
+</td>
+<td style="text-align:center;">
+-8.69498***
+</td>
+<td style="text-align:center;">
+-4.09434**
+</td>
+<td style="text-align:center;">
+7.20017
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.07401)
+</td>
+<td style="text-align:center;">
+(2.31480)
+</td>
+<td style="text-align:center;">
+(1.68852)
+</td>
+<td style="text-align:center;">
+(7.26393)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hhsize × NM
+</td>
+<td style="text-align:center;">
+-0.13715***
+</td>
+<td style="text-align:center;">
+4.76104***
+</td>
+<td style="text-align:center;">
+-0.13692***
+</td>
+<td style="text-align:center;">
+-14.16692**
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.02839)
+</td>
+<td style="text-align:center;">
+(1.77329)
+</td>
+<td style="text-align:center;">
+(0.02945)
+</td>
+<td style="text-align:center;">
+(6.04377)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hhsize × S_1
+</td>
+<td style="text-align:center;">
+-0.12493
+</td>
+<td style="text-align:center;">
+-1.59864
+</td>
+<td style="text-align:center;">
+-3.57701*
+</td>
+<td style="text-align:center;">
+-14.45032**
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.09102)
+</td>
+<td style="text-align:center;">
+(2.37670)
+</td>
+<td style="text-align:center;">
+(1.91500)
+</td>
+<td style="text-align:center;">
+(7.30780)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hhsize × S_2
+</td>
+<td style="text-align:center;">
+-0.20519
+</td>
+<td style="text-align:center;">
+0.31485
+</td>
+<td style="text-align:center;">
+-2.60478
+</td>
+<td style="text-align:center;">
+21.45983
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.28433)
+</td>
+<td style="text-align:center;">
+(20.28096)
+</td>
+<td style="text-align:center;">
+(18.25907)
+</td>
+<td style="text-align:center;">
+(46.22437)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hhsize × W_1
+</td>
+<td style="text-align:center;">
+-0.23881***
+</td>
+<td style="text-align:center;">
+2.93205**
+</td>
+<td style="text-align:center;">
+-0.31781***
+</td>
+<td style="text-align:center;">
+-9.03680**
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.03016)
+</td>
+<td style="text-align:center;">
+(1.19785)
+</td>
+<td style="text-align:center;">
+(0.10025)
+</td>
+<td style="text-align:center;">
+(3.76482)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hhsize × W_2
+</td>
+<td style="text-align:center;">
+-0.46146***
+</td>
+<td style="text-align:center;">
+12.48313***
+</td>
+<td style="text-align:center;">
+2.12626
+</td>
+<td style="text-align:center;">
+-45.63732**
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.08167)
+</td>
+<td style="text-align:center;">
+(4.47044)
+</td>
+<td style="text-align:center;">
+(2.03763)
+</td>
+<td style="text-align:center;">
+(21.84176)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_age × NM
+</td>
+<td style="text-align:center;">
+-0.00666***
+</td>
+<td style="text-align:center;">
+0.18147**
+</td>
+<td style="text-align:center;">
+-0.00624***
+</td>
+<td style="text-align:center;">
+-4.66225***
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.00205)
+</td>
+<td style="text-align:center;">
+(0.08860)
+</td>
+<td style="text-align:center;">
+(0.00185)
+</td>
+<td style="text-align:center;">
+(1.41219)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_age × S_1
+</td>
+<td style="text-align:center;">
+-0.13855***
+</td>
+<td style="text-align:center;">
+2.72713***
+</td>
+<td style="text-align:center;">
+2.45668***
+</td>
+<td style="text-align:center;">
+-4.78573**
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.01131)
+</td>
+<td style="text-align:center;">
+(0.41609)
+</td>
+<td style="text-align:center;">
+(0.37934)
+</td>
+<td style="text-align:center;">
+(1.89169)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_age × S_2
+</td>
+<td style="text-align:center;">
+-0.10607***
+</td>
+<td style="text-align:center;">
+2.33691**
+</td>
+<td style="text-align:center;">
+2.05607**
+</td>
+<td style="text-align:center;">
+5.99557
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.02746)
+</td>
+<td style="text-align:center;">
+(1.14202)
+</td>
+<td style="text-align:center;">
+(1.03181)
+</td>
+<td style="text-align:center;">
+(13.72799)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_age × W_1
+</td>
+<td style="text-align:center;">
+-0.05122***
+</td>
+<td style="text-align:center;">
+-0.02658
+</td>
+<td style="text-align:center;">
+-0.15532***
+</td>
+<td style="text-align:center;">
+-3.24971***
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.00224)
+</td>
+<td style="text-align:center;">
+(0.06341)
+</td>
+<td style="text-align:center;">
+(0.01469)
+</td>
+<td style="text-align:center;">
+(0.91444)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+r_age × W_2
+</td>
+<td style="text-align:center;">
+-0.06015***
+</td>
+<td style="text-align:center;">
+0.88195***
+</td>
+<td style="text-align:center;">
+0.63212***
+</td>
+<td style="text-align:center;">
+-9.32645**
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.00529)
+</td>
+<td style="text-align:center;">
+(0.23180)
+</td>
+<td style="text-align:center;">
+(0.19973)
+</td>
+<td style="text-align:center;">
+(4.37198)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+iv × Mandatory
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-55.09572***
+</td>
+<td style="text-align:center;">
+-49.95285***
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(12.64934)
+</td>
+<td style="text-align:center;">
+(11.27981)
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+iv × nonmandatory
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+-32.78251*
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(16.76876)
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+iv × School
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+846.85118
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(2143.70158)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+iv × Work
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+338.81986
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(281.50773)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+iv × other
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+418.40548**
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+(174.78488)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Num.Obs.
+</td>
+<td style="text-align:center;">
+8845
+</td>
+<td style="text-align:center;">
+8845
+</td>
+<td style="text-align:center;">
+8845
+</td>
+<td style="text-align:center;">
+8845
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AIC
+</td>
+<td style="text-align:center;">
+19073.7
+</td>
+<td style="text-align:center;">
+18687.0
+</td>
+<td style="text-align:center;">
+18708.2
+</td>
+<td style="text-align:center;">
+18571.8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BIC
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Log.Lik.
+</td>
+<td style="text-align:center;">
+-9516.850
+</td>
+<td style="text-align:center;">
+-9321.499
+</td>
+<td style="text-align:center;">
+-9332.110
+</td>
+<td style="text-align:center;">
+-9262.919
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rho2
+</td>
+<td style="text-align:center;">
+0.06515
+</td>
+<td style="text-align:center;">
+0.08434
+</td>
+<td style="text-align:center;">
+0.08329
+</td>
+<td style="text-align:center;">
+0.09009
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rho20
+</td>
+<td style="text-align:center;">
+0.39950
+</td>
+<td style="text-align:center;">
+0.41182
+</td>
+<td style="text-align:center;">
+0.41115
+</td>
+<td style="text-align:center;">
+0.41552
+</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="padding: 0; border:0;" colspan="100%">
+<sup></sup> * p &lt; 0.1, ** p &lt; 0.05, *** p &lt; 0.01
+</td>
+</tr>
+</tfoot>
+</table>
+<p>It can be seen from the table that the nesting structures helped provide a better fit to the data in all cases when compared to the unnested model, as indicated by the higher Log Likelihood values. For instance, the Log Likelihood of the unnested model is <strong>-9516.850</strong> whereas the Log Likelihood of Mod9 that has nests for school, work, and other trips is <strong>-9262.919</strong>. It is useful to use nesting structures in helping determine the best model. (One thing to note is that the nesting coefficients for all the nests are much larger than 1, when I expect them to be decimals, and only exceed 1 if they problematically draw trips from one nest to another. This must be an error in the way I set it up with the data, but I cannot figure out how to fix it. That being said, I feel I understand the purpose and usefulness of nesting structures, and that I have expressed that here. I will have to continue the analysis without the structures because I can’t figure out how to fix the nesting coefficients).</p>
+</div>
+<div id="segmentation-analysis" class="section level2">
+<h2>Segmentation Analysis</h2>
+<p>Market segmentation can give us additional insights into how the socioeconomic variables affect daily activity patterns. A couple of market segmentation analyses will be run on the current model to evaluate these differences. First, a segmentation on workers vs. non-workers will be made, since it is expected that this is a key distinction between several of the alternatives. I also imagine that household income will play a role in the ability or willingness of people to make trip types. For instance, low income drivers may be required to work multiple jobs or report to shifts at a physical location without the option of telecommuting. (This 2017 data is not affected by the recent COVID-19 pandemic, but the need to be at work physically is still a distinguishing factor for certain types of jobs). I will last look at segmentation of sex and see how patterns differ for males and females.</p>
+<pre class="r"><code>#base_model &lt;- mlogit(chosen ~ tvtt + cost | wkempden, data = sf_work)
+#withincome &lt;- mlogit(chosen ~ tvtt + cost | hhinc + wkempden, data = sf_work)
+#highincome &lt;- mlogit(chosen ~ tvtt + cost | hhinc + wkempden, 
+#                     data = sf_work %&gt;% filter(hhinc &gt; 50))
+#low_income &lt;- mlogit(chosen ~ tvtt + cost | hhinc + wkempden, 
+#                     data = sf_work %&gt;% filter(hhinc &lt;= 50))</code></pre>
 </div>
 
 

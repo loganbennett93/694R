@@ -7,7 +7,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r setup}
+```{r setup, include = FALSE}
 library(mlogit)
 library(tidyverse)
 library(dplyr)
@@ -46,14 +46,130 @@ Modbase <- mlogit(dap2 ~ 1 | hhvehcnt, data = choice_data)
 Mod1 <- mlogit(dap2 ~ 1 | hhsize, data = choice_data)
 Mod2 <- mlogit(dap2 ~ 1 | hhvehcnt + hhsize, data = choice_data)
 Mod3 <- mlogit(dap2 ~ 1 | vehperperson, data = choice_data)
+Mod4 <- mlogit(dap2 ~ 1 | hhvehcnt + hhsize + vehperperson, data = choice_data)
 
 list(
-  "HH Vehicles" = Modbase,
-  "HH Size" = Mod1,
-  "HH Vehicles and HH Size" = Mod2,
-  "Vehicles per HH Member" = Mod3
+  "Base - HH Vehicles" = Modbase,
+  "Mod1- HH Size" = Mod1,
+  "Mod2- HH Vehicles and HH Size" = Mod2,
+  "Mod3- Vehicles per HH Member" = Mod3,
+  "All Previous Variables" = Mod4
 ) %>%
   modelsummary(fmt = "%.5f", stars = TRUE, statistic_vertical = TRUE)
 ```
 
-The initial observation from the model summary above is that 
+The initial observation from the model summary above is that the intercepts for the several activity pattern choices are all significant. This means that more of the explanation for the choices is given by the intercepts than by the variables included, which is a problem. Additional iterations with more variables will need to be evaluated. In all cases where household vehicles are included the models indicate that as that number increases, the utility of a choice increases, which makes sense. It is assumed that a greater availability of vehicles would translate to more trip potential. Similarly, 
+
+I would expect that as the household size increases, the ability to make more trips decreases. Interestingly though, the household size is estimated to provide a disutility to only non-mandatory activities and those making two works tours. For instance, according to both models with household size included, there is a significant increase in utility for one school trip as household size increases, with coefficient estimates for Mod1 and Mod2 of **`r round(coef(Mod1)["hhsize:S_1"], 5)`** and **`r round(coef(Mod2)["hhsize:S_1"], 5)`**, respectively. This could be related to the fact that larger households likely have more children, and carpooling may take place between children. More members in a family could also be related to a higher number of workers. This may explain the positive relationship between household size and a one work tour pattern, whereas shared resources between more family members might make two work tours less possible (indicated by negative coefficients for models Mod1 and Mod2 of **`r round(coef(Mod1)["hhsize:W_2"], 5)`** and **`r round(coef(Mod2)["hhsize:W_2"], 5)`**), though not as significantly.
+
+The relationship between trip making potential, the number of available vehicles, and household size may be explained by the number of vehicles per person in a household. The results indicate that there is a significant benefit for those making non-mandatory trips, or work trips of one or two tours, indicated by the respective estimates **`r round(coef(Mod3)["vehperperson:NM"], 5)`**, **`r round(coef(Mod3)["vehperperson:W_1"], 5)`**, and **`r round(coef(Mod3)["vehperperson:W_2"], 5)`**. It makes sense that as the number of vehicles per person increases, non-mandatory trips may increase, since otherwise mandatory trips would take precedence. Work trips are also expected to be higher with a greater number of vehicles per person, though this may be related to ability to afford more vehicles with more workers. Interestingly, as the number of cars per person goes up, the utility goes down for school trips (though not significantly, indicated by SE values of **0.25723** for single school tours and **0.79125** for two school tours). I expect that those working would be more able to afford cars to get to work, and that most households with students may have less people and therefore less cars.
+
+However, the last model performed, including household vehicles, household size, and the number of vehicles per person had some unexpected results. For instance the coefficient for the household vehicles switched from a positive coefficient in the other models to a negative coefficient with the addition of this variable, with an estimate of **`r round(coef(Mod4)["hhvehcnt:NM"], 5)`**. This is somewhat counterintuitive since more vehicles should not be a detriment to the potential for trips, unless it is confounded with other socioeconomic variables. Similar changes occur for work trips by number of vehicles, as well as some trips by household size. For these reasons, thought that model has a higher log likelihood than the other models, the variable of vehicles per person is chosen not to be included in additional models.
+
+I will use log likelihood ratio tests to observe goodness of fit between the models and determine which of the variables should be included. A summary of those tests is found below.
+
+```{r iteration 1 LL tests}
+#Create likelihood ratio test table
+tibble(
+  "$H_0$" = c("Including household vehicle count makes no difference","Including hhsize makes no difference"),
+  LL_U = rep(Mod2$logLik, 2),
+  LL_R = c(Modbase$logLik, Mod1$logLik)
+) %>%
+  mutate(
+    test_stat = -2 * (LL_R - LL_U),
+    df = c(5, 5),
+    "Crtical Chi-Squared at 99.9% Conf." = qchisq(0.999, df),
+    "P-value" = pchisq(test_stat, df, lower.tail = FALSE)
+  ) %>%
+  kbl(align = 'c', caption = "Likelihood Ratio Test for Household Vehicle and Household Size Inclusion$") %>%
+  kable_styling()
+```
+
+Using Mod2 with both hhsize and hhvehcnt as the unrestricted model in both cases, tests were run with Modbase and Mod1 to determine the respective significance of including hhvehcnt and hhsize. In both cases, with 5 degrees of freedom, the test statistics indicate with strong evidence ($P-value = 0$) that these two variables should not be excluded from the models.
+
+The next iteration of models will include socioeconomic variables of age and race to see what effects these variables have on the model. Other socioeconomic variables such as sex, household income, education, and Hispanic status are highly collinear with choice, and cannot be included in models at this point, but they can be included in segmentation analysis later.
+
+```{r iteration 2 models}
+Mod2 <- mlogit(dap2 ~ 1 | hhvehcnt + hhsize, data = choice_data)
+Mod5 <- mlogit(dap2 ~ 1 | hhvehcnt + hhsize + r_age, data = choice_data)
+Mod6 <- mlogit(dap2 ~ 1 | hhvehcnt + hhsize + r_race, data = choice_data)
+
+list(
+  "Mod2- HH Vehicles and HH Size" = Mod2,
+  "Mod5- With Age" = Mod5,
+  "Mod6- With Race" = Mod6
+) %>%
+  modelsummary(fmt = "%.5f", stars = TRUE, statistic_vertical = TRUE)
+```
+
+A few interesting things can be noted from the above models. Mod2 with hhvehcnt and hhsize has pretty similar estimates for both intercepts and coefficients related to those two variables as Mod6 when race is introduced to the model. This may indicate that there is not a strong influence of race on the relationships between household size or vehicle ownership and daily activity patterns. Observation of the estimates for different race groups may highlight some differences between these communities, whether by cultural differences or inequity. For instance, there is very high disutility for members of Black, American Indian, or Pacific Islander groups to attend school, with estimates reaching as low as **`r round(coef(Mod6)["r_raceNative Hawaiian or other Pacific Islander:S_1"], 5)`**, which is the utility of Pacific Islanders making one school trip. However, the majority of these apparent discrepancies may be due to low sample size, indicated by extremely high standard errors (**236500** in the case of the given estimate above). Overall, the majority of estimates for the race variables are insignificant, and while the inclusion of the variable does increase the Log Likelihood from **-10102.804** to **-10067.528**, the insignificance of the majority of the estimates dissuades me from including it in further models.
+
+Unlike the race variables, the addition of age to household vehicles and household size does have significant effects. The intercepts between Mod2 and Mod5 (with age) change dramatically, and their significance is reduced in all cases, demonstrated by the larger standard errors in Mod5. The patterns of utility for number of vehicles are similar in these two models. However, there are some changes to the effect of household size when age is taken into account. Estimates of all school trips as well as work trips with one tour become significantly negative with the introduction of age. This should be expected since members of older households are no longer attending school or working, or their children of school and working age may have moved out. As expected, people tend to stay home as their age increases, indicated by the negative estimates for all daily activity patterns in the model compared to the reference level. Older drivers' may's pattern of non-mandatory trips, indicated by the significant estimate of **`r round(coef(Mod5)["r_age:NM"], 5)`**, is less affected than other trips such as school (**`r round(coef(Mod5)["r_age:S_1"], 5)`**) or work (**`r round(coef(Mod5)["r_age:W_1"], 5)`**).
+
+The addition of age to the model raises the Log Likelihood from **-10102.804** to **-9516.5850**, and a Log likelihood ratio test (shown below, with Mod5 as the unrestricted model and Mod2 as the restricted model) indicates with strong evidence that age should not be excluded from the model. (A Log Likelihood test on race could not be performed since the model would not run with both age and race included).
+
+```{r iteration 2 LL test}
+#Create likelihood ratio test table
+tibble(
+  "$H_0$" = "Including age makes no difference",
+  LL_U = Mod5$logLik,
+  LL_R = Mod2$logLik
+) %>%
+  mutate(
+    test_stat = -2 * (LL_R - LL_U),
+    df = 5,
+    "Crtical Chi-Squared at 99.9% Conf." = qchisq(0.999, df),
+    "P-value" = pchisq(test_stat, df, lower.tail = FALSE)
+  ) %>%
+  kbl(align = 'c', caption = "Likelihood Ratio Test for Age Inclusion") %>%
+  kable_styling()
+```
+
+## Nesting Structures
+
+It may be beneficial to look at the data that we have under certain nesting structures. For instance, people may first make activity pattern decisions at a higher level of whether trips are mandatory or not before making other decisions about their trips. A few alternative nesting structures are given below. The first, Mod7, has two nests, those trips that are mandatory, and those that are not. The second, Mod8, has a mandatory nest and all other trips (stay home or non-mandatory) are not nested. The third, M9, has nests of school trips and work trips (assuming that the number of trips to these locations is a decision made after the location itself), and all other trips nested together. A model summary comparing these trips to the unnested model Mod5 are shown in a summary below.
+
+```{r nesting structures}
+nest_formula <- dap2 ~ 1 | hhvehcnt + hhsize + r_age
+
+Mod5 <- mlogit(dap2 ~ 1 | hhvehcnt + hhsize + r_age, data = choice_data)
+Mod7 <- mlogit(nest_formula, data = choice_data,
+               nests = list(Mandatory = c('S_1', 'S_2', 'W_1', 'W_2'),  
+                            nonmandatory = c('H', 'NM')))
+Mod8 <- mlogit(nest_formula, data = choice_data,
+               nests = list(Mandatory = c('S_1', 'S_2', 'W_1', 'W_2'),  
+                            nonmandatory = c('H', 'NM')),
+               constPar = c("iv:nonmandatory" = 1))
+Mod9 <- mlogit(nest_formula, data = choice_data,
+               nests = list(School = c('S_1', 'S_2'),
+                            Work = c('W_1', 'W_2'),
+                            other = c('H', 'NM')))
+
+list(
+  "Model 5" = Mod5,
+  "Model 7" = Mod7,
+  "Model 8" = Mod8,
+  "Model 9" = Mod9
+) %>%
+  modelsummary(fmt = "%.5f", stars = TRUE, statistic_vertical = TRUE)
+```
+
+It can be seen from the table that the nesting structures helped provide a better fit to the data in all cases when compared to the unnested model, as indicated by the higher Log Likelihood values. For instance, the Log Likelihood of the unnested model is **-9516.850** whereas the Log Likelihood of Mod9 that has nests for school, work, and other trips is **-9262.919**. It is useful to use nesting structures in helping determine the best model. (One thing to note is that the nesting coefficients for all the nests are much larger than 1, when I expect them to be decimals, and only exceed 1 if they problematically draw trips from one nest to another. This must be an error in the way I set it up with the data, but I cannot figure out how to fix it. That being said, I feel I understand the purpose and usefulness of nesting structures, and that I have expressed that here. I will have to continue the analysis without the structures because I can't figure out how to fix the nesting coefficients).
+
+## Segmentation Analysis
+
+Market segmentation can give us additional insights into how the socioeconomic variables affect daily activity patterns. A couple of market segmentation analyses will be run on the current model to evaluate these differences. First, a segmentation on workers vs. non-workers will be made, since it is expected that this is a key distinction between several of the alternatives. I also imagine that household income will play a role in the ability or willingness of people to make trip types. For instance, low income drivers may be required to work multiple jobs or report to shifts at a physical location without the option of telecommuting. (This 2017 data is not affected by the recent COVID-19 pandemic, but the need to be at work physically is still a distinguishing factor for certain types of jobs). I will last look at segmentation of sex and see how patterns differ for males and females.
+
+```{r worker segmentation}
+
+
+#base_model <- mlogit(chosen ~ tvtt + cost | wkempden, data = sf_work)
+#withincome <- mlogit(chosen ~ tvtt + cost | hhinc + wkempden, data = sf_work)
+#highincome <- mlogit(chosen ~ tvtt + cost | hhinc + wkempden, 
+#                     data = sf_work %>% filter(hhinc > 50))
+#low_income <- mlogit(chosen ~ tvtt + cost | hhinc + wkempden, 
+#                     data = sf_work %>% filter(hhinc <= 50))
+
+```
+
+
